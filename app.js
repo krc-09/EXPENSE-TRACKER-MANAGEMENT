@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'views')));
  const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
 
-sequelize.sync()
+sequelize.sync({force:true})
   .then(result => {
     console.log('Database synced');
     app.listen(3000, () => {
