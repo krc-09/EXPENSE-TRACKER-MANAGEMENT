@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - Login Page</title>
+    <style>
+        #message {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <form onsubmit="handleFormSubmit(event)">
+        
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">LOGIN </button>
+        
+    </form>
+
+    <p id="message"></p>
+    <p><a href="./signup.html"> NEW USER -SIGNUP NOW</a></p>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+        
+            const logindetails = {
+                email: event.target.email.value,
+                password: event.target.password.value
+            };
+        
+            axios.post("http://localhost:3000/users/login", logindetails)
+                .then(response => {
+                    
+                  
+                    document.getElementById('message').innerText = 'Login successful!';
+                    document.getElementById('message').style.color = 'green';
+                })
+                .catch(err => {
+                    if (err.response && err.response.status === 401) {
+                        document.getElementById('message').innerText = 'Invalid email or password';
+                        document.getElementById('message').style.color = 'red';
+                    } else if(err.response && err.response.status === 404) {
+                        document.getElementById('message').innerText = 'user not found';
+                        document.getElementById('message').style.color = 'red';
+                        
+                    }else {
+                        document.getElementById('message').innerText = 'An error occurred. Please try again.';
+                        document.getElementById('message').style.color = 'orange';
+                    }
+                });
+        
+            event.target.reset();
+        }
+        </script>
+        
+</body>
+</html>
