@@ -44,6 +44,10 @@
                   
                     document.getElementById('message').innerText = 'Login successful!';
                     document.getElementById('message').style.color = 'green';
+                    if (document.getElementById('message').innerText === 'Login successful!') {
+    setTimeout(() => window.location.href = './expense.html', 2000);
+}
+
                 })
                 .catch(err => {
                     if (err.response && err.response.status === 401) {

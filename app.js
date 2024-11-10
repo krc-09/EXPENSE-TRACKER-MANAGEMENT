@@ -5,6 +5,7 @@ const cors = require('cors');
 const express = require('express');
 const app = express();
 const Users = require('./Models/users'); 
+const Expense = require('./Models/Expenses'); 
 
 
 app.use(cors());
@@ -16,6 +17,8 @@ app.use(express.static(path.join(__dirname, 'views')));
 
  const userRoutes = require('./routes/users');
 app.use('/users', userRoutes);
+const expenseRoutes = require('./routes/expenses');
+app.use('/expenses', expenseRoutes);
 
 sequelize.sync()
   .then(result => {
