@@ -1,0 +1,28 @@
+{
+  "name": "expense-tracker-management-full-stack",
+  "version": "1.0.0",
+  "description": "an expense management app",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "kankana roychowdhury",
+  "license": "ISC",
+  "dependencies": {
+    "-": "^0.0.1",
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
+    "body": "^5.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "g": "^2.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.11.4",
+    "parser": "^0.1.4",
+    "sequelize": "^6.37.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

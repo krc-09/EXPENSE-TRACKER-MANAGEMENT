@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+</head>
+<body style="margin:0">
+    <h1>Expense Tracker</h1>
+    <form onsubmit="handleFormSubmit(event)">
+        <label for="expenses">Choose Expenses</label>
+        <input type="text" id="expenses" name="expenses" required /><br>
+        <label for="category">Choose Category</label>
+        <select id="category" name="category" required>
+            <option value="food">food</option>
+            <option value="petrol">petrol</option>
+            <option value="salary">salary</option>
+            <option value="fooding">fooding</option>
+            <option value="outing">outing</option>
+            <option value="education">education</option>
+            <option value="grocery">grocery</option>
+        </select>
+        <label for="description">Choose Description</label>
+        <input type="text" id="description" name="description" required /><br>
+        <button type="submit">ADD Expense</button>
+    </form>
+    <ul></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+   
+
+    <script>
+        let currentexpenseId = null;
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const expenseDetails = {
+                expenses: event.target.expenses.value,
+                category: event.target.category.value,
+                description: event.target.description.value,
+                
+            };
+          const token = localStorage.getItem('token');
+            axios.post("http://localhost:3000/expenses/add-expenses", expenseDetails, { headers: { "Authorization": token } })
+                .then((response) => {
+                    const expenselist = document.querySelector("ul");
+                    expenselist.innerHTML = "";
+                    response.data.forEach(expense => displayExpenseOnScreen(expense));
+                })
+                .catch((error) => console.log(error));
+
+            // Clear the form fields
+            document.getElementById("expenses").value = "";
+            document.getElementById("category").value = "";
+            document.getElementById("description").value = "";
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem('token');
+        axios.get("http://localhost:3000/expenses/get-expenses", { headers: { "Authorization": token } })
+            .then((response) => {
+                response.data.forEach(expense => displayExpenseOnScreen(expense));
+            })
+            .catch((error) => console.log(error));
+    });
+
+        function displayExpenseOnScreen(expenseDetails) {
+            const expenseItem = document.createElement("li");
+            expenseItem.appendChild(
+                document.createTextNode(`${expenseDetails.expenses} - ${expenseDetails.category} - ${expenseDetails.description}`)
+            );
+
+            // Create delete button
+            const deleteBtn = document.createElement("button");
+            deleteBtn.appendChild(document.createTextNode("Delete"));
+            expenseItem.appendChild(deleteBtn);
+
+            // Create edit button
+            const editBtn = document.createElement("button");
+            editBtn.appendChild(document.createTextNode("Edit"));
+            expenseItem.appendChild(editBtn);
+
+            const expenseList = document.querySelector("ul");
+            expenseList.appendChild(expenseItem);
+
+            // Delete functionality
+            deleteBtn.addEventListener("click", function () {
+    const token = localStorage.getItem('token');
+    axios
+        .delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`, { headers: { "Authorization": token } })
+        .then(() => {
+            expenseList.removeChild(expenseItem);
+            console.log(`Expense with ID ${expenseDetails.id} deleted successfully`);
+        })
+        .catch((error) => {
+            console.error("Error deleting expense:", error);
+            alert("Failed to delete the expense.");
+        });
+});
+
+
+           
+            editBtn.addEventListener("click", function () {
+    // Populate form fields with existing values
+    document.getElementById("expenses").value = expenseDetails.expenses;
+    document.getElementById("category").value = expenseDetails.category;
+    document.getElementById("description").value = expenseDetails.description;
+
+   
+    currentexpenseId = expenseDetails.id;
+
+    // Delete the existing item from the UI
+    const expenseList = document.querySelector("ul");
+    expenseList.removeChild(expenseItem);
+
+    // Delete the existing item from the database
+    axios
+        .delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`)
+        .then(() => {
+            console.log(`Expense with ID ${expenseDetails.id} deleted successfully for editing`);
+        })
+        .catch((error) => console.log(error));
+
+       
+});
+        }
+    </script>
+</body>
+</html>
