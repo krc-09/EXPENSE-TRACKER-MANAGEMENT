@@ -39,14 +39,16 @@
                 category: event.target.category.value,
                 description: event.target.description.value,
             };
+            const token = localStorage.getItem('token'); // Ensure token is defined
 
-            axios.post("http://localhost:3000/expenses/add-expenses", expenseDetails)
-                .then((response) => {
-                    const expenselist = document.querySelector("ul");
-                    expenselist.innerHTML = "";
-                    response.data.forEach(expense => displayExpenseOnScreen(expense));
-                })
-                .catch((error) => console.log(error));
+axios.post("http://localhost:3000/expenses/add-expenses", expenseDetails, { headers: { "Authorization": token } })
+    .then((response) => {
+        const expenselist = document.querySelector("ul");
+        expenselist.innerHTML = "";
+        response.data.forEach(expense => displayExpenseOnScreen(expense));
+    })
+    .catch((error) => console.log(error));
+
 
             // Clear the form fields
             document.getElementById("expenses").value = "";
@@ -55,7 +57,8 @@
         }
 
         window.addEventListener("DOMContentLoaded", () => {
-            axios.get("http://localhost:3000/expenses/get-expenses")
+            const token = localStorage.getItem('token')
+            axios.get("http://localhost:3000/expenses/get-expenses",{headers :{"Authorization":token}})
                 .then((response) => {
                     response.data.forEach(expense => displayExpenseOnScreen(expense));
                 })
@@ -83,14 +86,13 @@
 
             // Delete functionality
             deleteBtn.addEventListener("click", function () {
-                axios
-                    .post(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`)
-                    .then(() => {
-                        expenseList.removeChild(expenseItem);
-                        console.log(`Expense with ID ${expenseDetails.id} deleted successfully`);
-                    })
-                    .catch((error) => console.log(error));
-            });
+          axios.delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`)
+        .then(() => {
+            expenseList.removeChild(expenseItem);
+            console.log(`Expense with ID ${expenseDetails.id} deleted successfully`);
+        })
+        .catch((error) => console.log(error));
+});
 
            
             editBtn.addEventListener("click", function () {

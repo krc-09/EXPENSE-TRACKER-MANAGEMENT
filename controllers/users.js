@@ -1,7 +1,7 @@
 
 const bcrypt = require('bcrypt');
 const Users = require('../Models/users')
-
+const jwt = require('jsonwebtoken')
 
 
 exports.postSignupDetails = async (req, res, next) => {
@@ -38,7 +38,9 @@ exports.postSignupDetails = async (req, res, next) => {
 };
 
 
-
+function generateAccessToken(id,name){
+    return jwt.sign({userId:id,name:name},'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmFtZSI6IkthbmthbmEgUm95Y2hvd2RodXJ5IiwiaWF0IjoxNTE2MjM5MDIyfQ.n6zmXiuW3y3JUh-AuGJoDZIS6Aa8m-t6L-FhCpzYNNc')
+}
 exports.postLoginDetails = async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -65,7 +67,7 @@ exports.postLoginDetails = async (req, res, next) => {
         }
 
         // Respond with 200 if login is successful
-        res.status(200).json({ message: 'User login successful' });
+        res.status(200).json({ message: 'User login successful',token:generateAccessToken(user.id,user.name)});
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Server error. Please try again later.' });

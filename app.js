@@ -8,6 +8,7 @@ const Users = require('./Models/users');
 const Expense = require('./Models/Expenses'); 
 
 
+
 app.use(cors());
 app.use(bodyParser.json()); // Apply bodyParser middleware before routes
 
@@ -19,6 +20,9 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.use('/users', userRoutes);
 const expenseRoutes = require('./routes/expenses');
 app.use('/expenses', expenseRoutes);
+
+Users.hasMany(Expense);
+Expense.belongsTo(Users);
 
 sequelize.sync()
   .then(result => {
