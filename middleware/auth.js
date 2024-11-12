@@ -8,7 +8,7 @@ const authenticate = (req, res, next) => {
         const token = req.header('Authorization');
         console.log(token);
 
-        const user = jwt.verify(token, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxIiwibmFtZSI6IkthbmthbmEgUm95Y2hvd2RodXJ5IiwiaWF0IjoxNTE2MjM5MDIyfQ.n6zmXiuW3y3JUh-AuGJoDZIS6Aa8m-t6L-FhCpzYNNc');
+        const user = jwt.verify(token, 'TOKEN_SECRET');
         console.log('userId >>>>', user.userId);
 
         User.findByPk(user.userId).then(user => {
