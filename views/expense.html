@@ -139,17 +139,23 @@ document.getElementById('rzp-button1').onclick = async function (e) {
             "order_id": response.data.order.id,
             "handler": async function (response) {
                 try {
-                    await axios.post('http://localhost:3000/purchase/updatetransactionstatus', {
+                    const res = await axios.post('http://localhost:3000/purchase/updatetransactionstatus', {
                         order_id: options.order_id,
                         payment_id: response.razorpay_payment_id,
                     }, {
                         headers: { "Authorization": token }
                     });
+                    // The response here contains the updated user info, including the new token
+                    console.log(res);
+
+                    // Show a success message and replace the button with a new message
                     alert('You are a premium user now');
                     const premiumMessage = document.createElement('p');
-                      premiumMessage.textContent = "You are a premium user now. Enjoy!";
-                     document.getElementById('rzp-button1').replaceWith(premiumMessage);
-                     localStorage.setItem('token',res.data.token)
+                    premiumMessage.textContent = "You are a premium user now. Enjoy!";
+                    document.getElementById('rzp-button1').replaceWith(premiumMessage);
+
+                    // Save the updated token to localStorage
+                    localStorage.setItem('token', res.data.token); // Make sure the new token is coming from the response
 
                 } catch (error) {
                     console.error('Error updating transaction status:', error);
@@ -170,6 +176,7 @@ document.getElementById('rzp-button1').onclick = async function (e) {
         alert('Something went wrong');
     }
 };
+
 
     
         

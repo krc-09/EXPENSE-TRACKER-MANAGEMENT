@@ -44,52 +44,7 @@ exports.postAddExpense = (req, res, next) => {
   });
 };
 
-// Delete an expense by ID
-// exports.postDeleteExpense = (req, res, next) => {
-//     const expenseId = req.params.id;
-//     const userId = req.user.id; // Assuming req.user.id is set after authentication
-  
-//     // Find the expense by ID and check the userId
-//     Expense.findOne({ where: { id: expenseId, userId: userId } })
-//         .then(expense => {
-//             if (!expense) {
-//                 return res.status(404).json({ error: 'Expense not found or not authorized to delete' });
-//             }
-//             return expense.destroy();
-//         })
-//         .then(() => {
-//             console.log("Destroyed Expense");
-//             res.status(200).json({ message: 'Expense deleted successfully' });
-//         })
-//         .catch(err => {
-//             console.error('Error deleting expense:', err);
-//             res.status(500).json({ error: 'An error occurred while deleting the expense.' });
-//         });
-//   };
-// exports.postDeleteExpense = (req, res, next) => {
-//     const expenseId = req.params.id;
-//     const userId = req.user.id; // Assuming req.user.id is set after authentication
-  
-//     // Find the expense by ID and check the userId
-//     Expense.findOne({ where: { id: expenseId, userId: userId } })
-//         .then(expense => {
-//             if (!expense) {
-//                 // If no expense found or not authorized to delete
-//                 return res.status(404).json({ error: 'Expense not found or not authorized to delete' });
-//             }
 
-//             // Proceed to delete the expense if found
-//             return expense.destroy();
-//         })
-//         .then(() => {
-//             // Only send response once the expense is deleted successfully
-//             res.status(200).json({ message: 'Expense deleted successfully' });
-//         })
-//         .catch(err => {
-//             console.error('Error deleting expense:', err);
-//             res.status(500).json({ error: 'An error occurred while deleting the expense.' });
-//         });
-// };
 exports.postDeleteExpense = (req, res, next) => {
     const expenseId = req.params.id;
     const userId = req.user.id; // Assuming req.user.id is set after authentication

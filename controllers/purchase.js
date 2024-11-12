@@ -31,20 +31,18 @@ const purchasepremium = async (req, res) => {
         res.status(401).json({ message: 'Something went wrong', error: err.message });
     }
 };
-function generateAccessToken(id, name, ispremiumuser) {
-    return jwt.sign({ userId: id, name: name, ispremiumuser: ispremiumuser }, 'TOKEN_SECRET');
+function generateAccessToken(id,name,ispremiumuser){
+    return jwt.sign({userId:id,name:name,ispremiumuser},'TOKEN_SECRET')
 }
 const updateTransactionStatus = async (req, res) => {
     try {
         const { payment_id, order_id } = req.body;
 
-        // Find the order using the provided order ID
         const order = await Order.findOne({ where: { orderid: order_id } });
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        // Update the order status and user premium status
         await Promise.all([
             order.update({ paymentid: payment_id, status: 'SUCCESSFUL' }),
             req.user.update({ ispremiumuser: true })
@@ -53,11 +51,10 @@ const updateTransactionStatus = async (req, res) => {
         // Generate a new token with updated premium status
         const newToken = generateAccessToken(req.user.id, req.user.name, true);
 
-        // Respond with the new token and success message
-        return res.status(202).json({ 
-            success: true, 
+        return res.status(202).json({
+            success: true,
             message: 'Transaction successful',
-            token: newToken 
+            token: newToken // Add token here
         });
     } catch (err) {
         console.error('Error:', err);
