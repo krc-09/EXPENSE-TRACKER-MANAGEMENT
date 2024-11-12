@@ -3,127 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
+    <title>Expense Tracker - Login Page</title>
+    <style>
+        #message {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
 </head>
-<body style="margin:0">
-    <h1>Expense Tracker</h1>
+<body>
     <form onsubmit="handleFormSubmit(event)">
-        <label for="expenses">Choose Expenses</label>
-        <input type="text" id="expenses" name="expenses" required /><br>
-        <label for="category">Choose Category</label>
-        <select id="category" name="category" required>
-            <option value="food">food</option>
-            <option value="petrol">petrol</option>
-            <option value="salary">salary</option>
-            <option value="fooding">fooding</option>
-            <option value="outing">outing</option>
-            <option value="education">education</option>
-            <option value="grocery">grocery</option>
-        </select>
-        <label for="description">Choose Description</label>
-        <input type="text" id="description" name="description" required /><br>
-        <button type="submit">ADD Expense</button>
+        
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">LOGIN </button>
+        
     </form>
-    <ul></ul>
+
+    <p id="message"></p>
+    <p><a href="./signup.html"> NEW USER -SIGNUP NOW</a></p>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
-   
 
     <script>
-        let currentexpenseId = null;
-
         function handleFormSubmit(event) {
             event.preventDefault();
-
-            const expenseDetails = {
-                expenses: event.target.expenses.value,
-                category: event.target.category.value,
-                description: event.target.description.value,
-                
+        
+            const logindetails = {
+                email: event.target.email.value,
+                password: event.target.password.value
             };
-          const token = localStorage.getItem('token');
-            axios.post("http://localhost:3000/expenses/add-expenses", expenseDetails, { headers: { "Authorization": token } })
-                .then((response) => {
-                    const expenselist = document.querySelector("ul");
-                    expenselist.innerHTML = "";
-                    response.data.forEach(expense => displayExpenseOnScreen(expense));
+        
+            axios.post("http://localhost:3000/users/login", logindetails)
+                .then(response => {
+                    
+                  
+                    document.getElementById('message').innerText = 'Login successful!';
+                    document.getElementById('message').style.color = 'green';
+                    if (document.getElementById('message').innerText === 'Login successful!') {
+
+                        localStorage.setItem('token',response.data.token)
+    setTimeout(() => window.location.href = './expense.html', 2000);
+}
+
                 })
-                .catch((error) => console.log(error));
-
-            // Clear the form fields
-            document.getElementById("expenses").value = "";
-            document.getElementById("category").value = "";
-            document.getElementById("description").value = "";
+                .catch(err => {
+                    if (err.response && err.response.status === 401) {
+                        document.getElementById('message').innerText = 'Invalid email or password';
+                        document.getElementById('message').style.color = 'red';
+                    } else if(err.response && err.response.status === 404) {
+                        document.getElementById('message').innerText = 'user not found';
+                        document.getElementById('message').style.color = 'red';
+                        
+                    }else {
+                        document.getElementById('message').innerText = 'An error occurred. Please try again.';
+                        document.getElementById('message').style.color = 'orange';
+                    }
+                });
+        
+            event.target.reset();
         }
-
-        window.addEventListener("DOMContentLoaded", () => {
-        const token = localStorage.getItem('token');
-        axios.get("http://localhost:3000/expenses/get-expenses", { headers: { "Authorization": token } })
-            .then((response) => {
-                response.data.forEach(expense => displayExpenseOnScreen(expense));
-            })
-            .catch((error) => console.log(error));
-    });
-
-        function displayExpenseOnScreen(expenseDetails) {
-            const expenseItem = document.createElement("li");
-            expenseItem.appendChild(
-                document.createTextNode(`${expenseDetails.expenses} - ${expenseDetails.category} - ${expenseDetails.description}`)
-            );
-
-            // Create delete button
-            const deleteBtn = document.createElement("button");
-            deleteBtn.appendChild(document.createTextNode("Delete"));
-            expenseItem.appendChild(deleteBtn);
-
-            // Create edit button
-            const editBtn = document.createElement("button");
-            editBtn.appendChild(document.createTextNode("Edit"));
-            expenseItem.appendChild(editBtn);
-
-            const expenseList = document.querySelector("ul");
-            expenseList.appendChild(expenseItem);
-
-            // Delete functionality
-            deleteBtn.addEventListener("click", function () {
-    const token = localStorage.getItem('token');
-    axios
-        .delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`, { headers: { "Authorization": token } })
-        .then(() => {
-            expenseList.removeChild(expenseItem);
-            console.log(`Expense with ID ${expenseDetails.id} deleted successfully`);
-        })
-        .catch((error) => {
-            console.error("Error deleting expense:", error);
-            alert("Failed to delete the expense.");
-        });
-});
-
-
-           
-            editBtn.addEventListener("click", function () {
-    // Populate form fields with existing values
-    document.getElementById("expenses").value = expenseDetails.expenses;
-    document.getElementById("category").value = expenseDetails.category;
-    document.getElementById("description").value = expenseDetails.description;
-
-   
-    currentexpenseId = expenseDetails.id;
-
-    // Delete the existing item from the UI
-    const expenseList = document.querySelector("ul");
-    expenseList.removeChild(expenseItem);
-
-    // Delete the existing item from the database
-    axios
-        .delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`)
-        .then(() => {
-            console.log(`Expense with ID ${expenseDetails.id} deleted successfully for editing`);
-        })
-        .catch((error) => console.log(error));
-
-       
-});
-        }
-    </script>
+        </script>
+        
 </body>
 </html>

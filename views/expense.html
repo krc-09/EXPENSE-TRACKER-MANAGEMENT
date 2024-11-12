@@ -24,6 +24,8 @@
         <input type="text" id="description" name="description" required /><br>
         <button type="submit">ADD Expense</button>
     </form>
+    <button id="rzp-button1">Buy Premium</button>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <ul></ul>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
    
@@ -39,7 +41,7 @@
                 category: event.target.category.value,
                 description: event.target.description.value,
             };
-            const token = localStorage.getItem('token'); // Ensure token is defined
+            const token = localStorage.getItem('token'); 
 
 axios.post("http://localhost:3000/expenses/add-expenses", expenseDetails, { headers: { "Authorization": token } })
     .then((response) => {
@@ -94,31 +96,55 @@ axios.post("http://localhost:3000/expenses/add-expenses", expenseDetails, { head
         .catch((error) => console.log(error));
 });
 
-           
-            editBtn.addEventListener("click", function () {
-    // Populate form fields with existing values
-    document.getElementById("expenses").value = expenseDetails.expenses;
-    document.getElementById("category").value = expenseDetails.category;
-    document.getElementById("description").value = expenseDetails.description;
+}  
+document.getElementById('rzp-button1').onclick = async function (e) {
+    e.preventDefault(); // Move this to the start to prevent any default action
 
-   
-    currentexpenseId = expenseDetails.id;
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get("http://localhost:3000/purchase/premiummembership", {
+            headers: { "Authorization": token }
+        });
+        console.log(response);
 
-    // Delete the existing item from the UI
-    const expenseList = document.querySelector("ul");
-    expenseList.removeChild(expenseItem);
+        var options = {
+            "key": response.data.key_id,
+            "order_id": response.data.order.id,
+            "handler": async function (response) {
+                try {
+                    await axios.post('http://localhost:3000/purchase/updatetransactionstatus', {
+                        order_id: options.order_id,
+                        payment_id: response.razorpay_payment_id,
+                    }, {
+                        headers: { "Authorization": token }
+                    });
+                    alert('You are a premium user now');
+                    const premiumMessage = document.createElement('p');
+                      premiumMessage.textContent = "You are a premium user now. Enjoy!";
+                     document.getElementById('rzp-button1').replaceWith(premiumMessage);
 
-    // Delete the existing item from the database
-    axios
-        .post(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`)
-        .then(() => {
-            console.log(`Expense with ID ${expenseDetails.id} deleted successfully for editing`);
-        })
-        .catch((error) => console.log(error));
+                } catch (error) {
+                    console.error('Error updating transaction status:', error);
+                }
+            },
+        };
 
-       
-});
-        }
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+
+        rzp1.on('payment.failed', function (response) {
+            console.log(response);
+            alert('Something went wrong');
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Something went wrong');
+    }
+};
+
+    
+        
     </script>
 </body>
 </html>

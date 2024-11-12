@@ -6,7 +6,7 @@ const express = require('express');
 const app = express();
 const Users = require('./Models/users'); 
 const Expense = require('./Models/Expenses'); 
-
+const Order = require('./Models/orders'); 
 
 
 app.use(cors());
@@ -20,10 +20,15 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.use('/users', userRoutes);
 const expenseRoutes = require('./routes/expenses');
 app.use('/expenses', expenseRoutes);
+const purchaseRoutes = require('./routes/purchase');
+app.use('/purchase', purchaseRoutes);
+
 
 Users.hasMany(Expense);
 Expense.belongsTo(Users);
 
+Users.hasMany(Order);
+Order.belongsTo(Users);
 sequelize.sync()
   .then(result => {
     console.log('Database synced');
