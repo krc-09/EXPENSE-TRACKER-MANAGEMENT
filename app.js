@@ -22,6 +22,8 @@ const expenseRoutes = require('./routes/expenses');
 app.use('/expenses', expenseRoutes);
 const purchaseRoutes = require('./routes/purchase');
 app.use('/purchase', purchaseRoutes);
+const premiumRoutes = require('./routes/premium');
+app.use('/premium', premiumRoutes);
 
 
 Users.hasMany(Expense);
