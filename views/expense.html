@@ -52,6 +52,7 @@
                     const expenselist = document.querySelector("ul");
                     expenselist.innerHTML = "";
                     response.data.forEach(expense => displayExpenseOnScreen(expense));
+                    
                 })
                 .catch((error) => console.log(error));
 
