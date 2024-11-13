@@ -4,32 +4,25 @@ const sequelize = require('../utils/database');
 
 const getUserLeaderBoard = async (req, res) => {
     try {
-        // Retrieve all users and expenses from the database
-        const users = await User.findAll();
-        const expenses = await Expense.findAll();
-
-        // Aggregate expenses by user ID
-        const userAggregatedExpense = {};
-        expenses.forEach((expense) => {
-            console.log(expense);
-            if (userAggregatedExpense[expense.userId]) {
-                userAggregatedExpense[expense.userId] += expense.expenses;
-            } else {
-                userAggregatedExpense[expense.userId] = expense.expenses;
-            }
+        // Retrieve all users with their IDs and names, including the total cost of expenses
+        const leaderboardofusers = await User.findAll({
+            attributes: [
+                'id', 
+                'name', 
+                [sequelize.fn('SUM', sequelize.col('expenses')), 'total_cost']
+            ],
+            include: [
+                {
+                    model: Expense,
+                    attributes: [] // Include expenses but don't return the details in the response
+                }
+            ],
+            group: ['users.id'],
+            order: [[sequelize.literal('total_cost'), 'DESC']]
         });
 
-        // Create an array of user leaderboard details
-        const userLeaderBoardDetails = users.map((user) => ({
-            name: user.name,
-            totalCost: userAggregatedExpense[user.id] || 0 // Default to 0 if no expenses
-        }));
-
-        // Sort the leaderboard details in descending order by total cost
-        userLeaderBoardDetails.sort((a, b) => b.totalCost - a.totalCost);
-
         // Send the sorted leaderboard as the response
-        res.status(200).json(userLeaderBoardDetails);
+        res.status(200).json(leaderboardofusers);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'An error occurred while fetching the leaderboard' });
