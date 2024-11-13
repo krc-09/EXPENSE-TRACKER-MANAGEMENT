@@ -1,5 +1,6 @@
 const Expense = require('../Models/Expenses');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const Users = require('../Models/users');
 
 // Get all expenses
 exports.getAddExpense = (req, res, next) => {
@@ -15,34 +16,49 @@ exports.getAddExpense = (req, res, next) => {
 
 // Add a new expense
 exports.postAddExpense = (req, res, next) => {
-  const expenses = req.body.expenses;
-  const category = req.body.category;
-  const description = req.body.description;
-
-  if (!expenses) {
+    const expenses = req.body.expenses;
+    const category = req.body.category;
+    const description = req.body.description;
+  
+    if (!expenses) {
       return res.status(400).json({ error: 'Expense is mandatory' });
-  }
-  if (!category) {
+    }
+    if (!category) {
       return res.status(400).json({ error: 'Category is mandatory' });
-  }
-
-  Expense.create({
+    }
+  
+    // Create the new expense
+    Expense.create({
       expenses: expenses,  // Updated to match model field name
       category: category,
       description: description,
-      userId :req.user.id
-  })
-  .then(() => {
+      userId: req.user.id
+    })
+    .then(() => {
+      // Calculate total expenses and update the user's total expenses
+      const totalExpenses = Number(req.user.totalExpenses) + Number(expenses);
+      console.log(totalExpenses);
+  
+      // Ensure you're updating the correct user by specifying `userId`
+      return Users.update(
+        { totalExpenses: totalExpenses },
+        { where: { id: req.user.id } }  // Add condition to update the current user
+      );
+    })
+    .then(() => {
+      // Fetch the updated expenses list for the user
       return Expense.findAll({ where: { userId: req.user.id } });
-  })
-  .then(expenses => {
-      res.status(201).json(expenses); // Return updated expense list
-  })
-  .catch(err => {
+    })
+    .then(expenses => {
+      // Return the updated expenses list
+      res.status(201).json(expenses);
+    })
+    .catch(err => {
       console.error('Error adding expense:', err);
       res.status(500).json({ error: 'An error occurred' });
-  });
-};
+    });
+  };
+  
 
 
 exports.postDeleteExpense = (req, res, next) => {

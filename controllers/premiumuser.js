@@ -6,19 +6,8 @@ const getUserLeaderBoard = async (req, res) => {
     try {
         // Retrieve all users with their IDs and names, including the total cost of expenses
         const leaderboardofusers = await User.findAll({
-            attributes: [
-                'id', 
-                'name', 
-                [sequelize.fn('SUM', sequelize.col('expenses')), 'total_cost']
-            ],
-            include: [
-                {
-                    model: Expense,
-                    attributes: [] // Include expenses but don't return the details in the response
-                }
-            ],
-            group: ['users.id'],
-            order: [[sequelize.literal('total_cost'), 'DESC']]
+           
+            order: [[sequelize.literal('totalExpenses'), 'DESC']]
         });
 
         // Send the sorted leaderboard as the response

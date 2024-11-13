@@ -24,11 +24,15 @@
         <input type="text" id="description" name="description" required /><br>
         <button type="submit">ADD Expense</button>
     </form>
-    <button id="rzp-button1">Buy Premium</button>
-    <div id="leaderboard"></div> <!-- Added leaderboard container -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <ul></ul>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+    <button id="rzp-button1">Buy Premium</button>
+     <!-- Added leaderboard container -->
+   
+    <div id = "leaderboard-button"></div>
+    <ul></ul>
+    <div id="leaderboard"></div>
    
     <script>
         let currentexpenseId = null;
@@ -107,17 +111,17 @@
             deleteBtn.appendChild(document.createTextNode("Delete"));
             expenseItem.appendChild(deleteBtn);
 
-            // Create edit button
-            const editBtn = document.createElement("button");
-            editBtn.appendChild(document.createTextNode("Edit"));
-            expenseItem.appendChild(editBtn);
+            
 
             const expenseList = document.querySelector("ul");
             expenseList.appendChild(expenseItem);
 
             // Delete functionality
             deleteBtn.addEventListener("click", function () {
-                axios.delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`)
+                const token = localStorage.getItem('token'); 
+                axios.delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`, {
+                    headers: { "Authorization": token }
+                })
                     .then(() => {
                         expenseList.removeChild(expenseItem);
                         console.log(`Expense with ID ${expenseDetails.id} deleted successfully`);
@@ -180,33 +184,37 @@
         };
 
         function showLeaderBoard() {
-            const inputElement = document.createElement("input");
-            inputElement.type = "button";
-            inputElement.value = 'Show LeaderBoard';
+    const inputElement = document.createElement("input");
+    inputElement.type = "button";
+    inputElement.value = 'Show LeaderBoard';
 
-            inputElement.onclick = async () => {
-                try {
-                    const token = localStorage.getItem('token');
-                    const userLeaderBoardArray = await axios.get('http://localhost:3000/premium/showleaderboard', {
-                        headers: { "Authorization": token }
-                    });
+    inputElement.onclick = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const userLeaderBoardArray = await axios.get('http://localhost:3000/premium/showleaderboard', {
+                headers: { "Authorization": token }
+            });
 
-                    console.log(userLeaderBoardArray);
-                    var leaderboardElement = document.getElementById('leaderboard');
-                    leaderboardElement.innerHTML = '<h1>LeaderBoard</h1>'; // Clear and add header
+            console.log(userLeaderBoardArray);
+            var leaderboardElement = document.getElementById('leaderboard');
+            leaderboardElement.innerHTML = '<h1>LeaderBoard</h1>'; // Clear and add header
 
-                    userLeaderBoardArray.data.forEach((userDetails) => {
-                        leaderboardElement.innerHTML += `<p>Name: ${userDetails.name} - Total Expense: ${userDetails.total_cost}</p>`;
-                    });
-
-                    document.body.appendChild(inputElement);
-                } catch (error) {
-                    console.error('Error fetching leaderboard:', error);
-                }
-            };
-
-            document.getElementById('leaderboard').appendChild(inputElement); // Appends the input to the leaderboard div
+            userLeaderBoardArray.data.forEach((userDetails) => {
+                leaderboardElement.innerHTML += `<p>Name: ${userDetails.name} - Total Expense: ${userDetails.totalExpenses}</p>`;
+            });
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
         }
+    };
+
+    // Append the button first so that it stays on top of the leaderboard
+    document.getElementById('leaderboard-button').appendChild(inputElement);
+
+    // Now, append the leaderboard after the button has been added
+    const leaderboardElement = document.getElementById('leaderboard');
+    leaderboardElement.innerHTML = ''; // Clear any previous content before adding the leaderboard
+}
+
     </script>
 </body>
 </html>
