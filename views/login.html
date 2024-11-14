@@ -24,12 +24,54 @@
         <button type="submit">LOGIN </button>
         
     </form>
+     <button onclick="openForm()">FORGOT PASSWORD</button>
+     <div id="formContainer">
+        <form onsubmit = "handleForgotPassword(event)">
+           
+            <label for="email">Email:</label>
+            <input type="email" id="forgotemail" name="forgotemail"><br><br>
+            <input type="submit" value="FORGOT PASSWORD">
+        </form>
+    </div>
 
     <p id="message"></p>
     <p><a href="./signup.html"> NEW USER -SIGNUP NOW</a></p>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+<style>
+    #formContainer{
+        display:none;
+        border:1px solid paleturquoise;
+        padding: 20px;
+        margin-top: 20px;
+        width: 300px;
 
+    }
+</style>
     <script>
+ function openForm() {
+            document.getElementById('formContainer').style.display = 'block';
+        }
+
+        function handleForgotPassword(event) {
+            event.preventDefault();
+
+            const email = event.target.forgotemail.value;
+
+            axios.post("http://localhost:3000/password/forgotpassword", { email })
+                .then(response => {
+                    document.getElementById('message').innerText = 'Password reset link sent!';
+                    document.getElementById('message').style.color = 'green';
+                })
+                .catch(err => {
+                    document.getElementById('message').innerText = 'An error occurred. Please try again.';
+                    document.getElementById('message').style.color = 'red';
+                });
+
+            event.target.reset();
+        }
+
+
+
         function handleFormSubmit(event) {
             event.preventDefault();
         

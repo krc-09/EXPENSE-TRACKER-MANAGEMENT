@@ -95,7 +95,7 @@ exports.postAddExpense = async (req, res, next) => {
             { totalExpenses: updatedTotalExpenses },
             { where: { id: userId } }
         );
-
+           
         // Successfully deleted the expense and updated total expenses
         res.status(200).json({ message: 'Expense deleted successfully' });
     } catch (err) {
