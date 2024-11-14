@@ -18,7 +18,7 @@ const forgotpassword = async (req, res) => {
                     throw new Error(err)
                 })
 
-            sgMail.setApiKey(process.env.API_KEY)
+           
 
             const msg = {
                 to: email, // Change to your recipient
