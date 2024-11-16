@@ -72,25 +72,27 @@
 
             return JSON.parse(jsonPayload);
         }
-    function download(){
-    axios.get('http://localhost:3000/user/download', { headers: {"Authorization" : token} })
-    .then((response) => {
-        if(response.status === 201){
-            //the bcakend is essentially sending a download link
-            //  which if we open in browser, the file would download
-            var a = document.createElement("a");
-            a.href = response.data.fileUrl;
-            a.download = 'myexpense.csv';
-            a.click();
-        } else {
-            throw new Error(response.data.message)
-        }
-
-    })
-    .catch((err) => {
-        showError(err)
-    });
+        function download() {
+    const token = localStorage.getItem('token'); 
+    axios.get('http://localhost:3000/users/download', { headers: { "Authorization": token } })
+        .then((response) => {
+            if (response.status === 200) {
+                console.log('Download URL:', response.data.fileURL); // Add this line for debugging
+                var a = document.createElement("a");
+                a.href = response.data.fileURL;
+                a.download = 'myexpense.csv';
+                document.body.appendChild(a); // Append to body to ensure click works in all environments
+                a.click();
+                document.body.removeChild(a); // Remove after click
+            } else {
+                throw new Error(response.data.message);
+            }
+        })
+        .catch((err) => {
+            console.error('Download function error:', err);
+        });
 }
+
 
         window.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('token');
