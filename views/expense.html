@@ -34,6 +34,7 @@
     <div id = "leaderboard-button"></div>
     <ul></ul>
     <div id="leaderboard"></div>
+    <div id ="pagination">Pagination</div>
    
     <script>
         let currentexpenseId = null;
@@ -72,7 +73,7 @@
 
             return JSON.parse(jsonPayload);
         }
-        function download() {
+    function download() {
     const token = localStorage.getItem('token'); 
     axios.get('http://localhost:3000/users/download', { headers: { "Authorization": token } })
         .then((response) => {
@@ -92,10 +93,32 @@
             console.error('Download function error:', err);
         });
 }
+let currentPage = 1;
+
+function loadExpenses(page) {
+  const token = localStorage.getItem('token');
+  axios.get(`http://localhost:3000/expenses/get-expenses?page=${page}`, {
+    headers: { "Authorization": token }
+  })
+  .then((response) => {
+    const expenselist = document.querySelector("ul");
+    expenselist.innerHTML = ""; // Clear the list
+    response.data.expenses.forEach(expense => displayExpenseOnScreen(expense));
+
+    // Add pagination controls
+    document.getElementById('pagination').innerHTML = `
+      <button ${page <= 1 ? 'disabled' : ''} onclick="loadExpenses(${page - 1})">Previous</button>
+      <span>Page ${page} of ${response.data.totalPages}</span>
+      <button ${page >= response.data.totalPages ? 'disabled' : ''} onclick="loadExpenses(${page + 1})">Next</button>
+    `;
+  })
+  .catch((error) => console.log(error));
+}
 
 
         window.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem('token');
+            loadExpenses(currentPage);
             if (token) {
                 const decodedToken = parseJwt(token);
                 const isAdmin = decodedToken.ispremiumuser;

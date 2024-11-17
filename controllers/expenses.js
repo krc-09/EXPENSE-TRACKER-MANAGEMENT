@@ -10,13 +10,29 @@ const FileUrl = require('../Models/fileurls');
 // Get all expenses for a specific user
 const getAddExpense = async (req, res, next) => {
   try {
-    const expenses = await Expense.findAll({ where: { userId: req.user.id } });
-    res.status(200).json(expenses);
+    const page = parseInt(req.query.page) || 1; // Get page from query params, default to 1
+    const limit = 10; // Number of expenses per page
+    const offset = (page - 1) * limit; // Calculate offset
+
+    // Fetch expenses with pagination
+    const expenses = await Expense.findAndCountAll({
+      where: { userId: req.user.id },
+      limit: limit,
+      offset: offset,
+      order: [['createdAt', 'DESC']], // Optional: order by created date
+    });
+
+    res.status(200).json({
+      expenses: expenses.rows,
+      currentPage: page,
+      totalPages: Math.ceil(expenses.count / limit),
+    });
   } catch (err) {
     console.error('Error fetching expenses:', err);
     res.status(500).json({ error: 'An error occurred' });
   }
 };
+
 
 
 // Download expenses and upload them to S3

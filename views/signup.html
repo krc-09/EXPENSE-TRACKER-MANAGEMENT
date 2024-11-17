@@ -42,6 +42,7 @@
 
             axios.post("http://localhost:3000/users/signup", signupDetails)
                 .then(response => {
+                    
                     // Display success message
                     document.getElementById('message').innerText = 'Signup successful!';
                     document.getElementById('message').style.color = 'green';
