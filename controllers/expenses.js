@@ -11,7 +11,7 @@ const FileUrl = require('../Models/fileurls');
 const getAddExpense = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1; // Get page from query params, default to 1
-    const limit = 10; // Number of expenses per page
+    const limit = parseInt(req.query.limit) || 10; // Get limit from query params, default to 10
     const offset = (page - 1) * limit; // Calculate offset
 
     // Fetch expenses with pagination
