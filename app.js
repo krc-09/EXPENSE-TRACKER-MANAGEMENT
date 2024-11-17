@@ -8,6 +8,7 @@ const Users = require('./Models/users');
 const Expense = require('./Models/Expenses'); 
 const Order = require('./Models/orders'); 
 const Forgotpassword = require('./Models/forgotpassword');
+const FileUrl = require('./Models/fileurls')
 
 
 app.use(cors());
@@ -37,6 +38,9 @@ Order.belongsTo(Users);
 
 Users.hasMany(Forgotpassword);
 Forgotpassword.belongsTo(Users);
+
+Users.hasMany(FileUrl);
+FileUrl.belongsTo(Users);
 sequelize.sync()
   .then(result => {
     console.log('Database synced');

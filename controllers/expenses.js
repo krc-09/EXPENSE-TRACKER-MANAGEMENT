@@ -2,37 +2,11 @@ const Expense = require('../Models/Expenses');
 const jwt = require('jsonwebtoken');
 const Users = require('../Models/users');
 const sequelize = require('../utils/database');
-const AWS = require('aws-sdk');
 
-function uploadToS3(data, filename) {
-  const BUCKET_NAME = 'expensetracking009';
-  const IAM_USER_KEY = process.env.IAM_USER_KEY;
-  const IAM_USER_SECRET = process.env.IAM_USER_SECRET;
-  const s3bucket = new AWS.S3({
-    accessKeyId: IAM_USER_KEY,
-    secretAccessKey: IAM_USER_SECRET,
-  });
+const UserServices = require('../services/userservices');
+const S3Service = require('../services/S3services');
+const FileUrl = require('../Models/fileurls');
 
-  
-    var params = {
-      Bucket: BUCKET_NAME,
-      Key: filename,
-      Body: data,
-      ACL:'public-read'
-    };
-    
-  return new Promise((resolve, reject) => {
-    s3bucket.upload(params, (err, s3response) => {
-      if (err) {
-        console.error('Error uploading to S3:', err);
-        reject(err);
-      } else {
-        console.log('Upload successful:', s3response);
-        resolve(s3response.Location); // Return the file URL on success
-      }
-    });
-  });
-}
 // Get all expenses for a specific user
 const getAddExpense = async (req, res, next) => {
   try {
@@ -48,7 +22,7 @@ const getAddExpense = async (req, res, next) => {
 // Download expenses and upload them to S3
 const downloadexpense = async (req, res) => {
   try {
-    const expenses = await Expense.findAll({ where: { userId: req.user.id } });
+    const expenses = await UserServices.getAddExpenses(req)
 
     if (!expenses || expenses.length === 0) {
       return res.status(404).json({ error: 'No expenses found to download' });
@@ -58,7 +32,12 @@ const downloadexpense = async (req, res) => {
     const filename = `Expense_${req.user.id}_${new Date()}.txt`;
 
     // Await the result of uploadToS3
-    const fileURL = await uploadToS3(stringifiedExpenses, filename);
+    const fileURL = await S3Service.uploadToS3(stringifiedExpenses, filename);
+    await  FileUrl.create({url: fileURL,userId:req.user.id});
+
+
+    // Return a success response
+
     res.status(200).json({ fileURL, success: true });
   } catch (error) {
     console.error('Error downloading expense:', error);
