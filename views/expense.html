@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+</head>
+<body style="margin:0">
+    <h1>Expense Tracker</h1>
+    <form id="preferences-form">
+        <label for="items-per-page">Number of expenses per page:</label>
+        <input type="number" id="items-per-page" min="1" placeholder="Enter number" required>
+        <button type="submit">Set</button>
+    </form>
+    
+    <form onsubmit="handleFormSubmit(event)">
+        <label for="expenses">Choose Expenses</label>
+        <input type="text" id="expenses" name="expenses" required /><br>
+        <label for="category">Choose Category</label>
+        <select id="category" name="category" required>
+            <option value="food">food</option>
+            <option value="petrol">petrol</option>
+            <option value="salary">salary</option>
+            <option value="fooding">fooding</option>
+            <option value="outing">outing</option>
+            <option value="education">education</option>
+            <option value="grocery">grocery</option>
+        </select>
+        <label for="description">Choose Description</label>
+        <input type="text" id="description" name="description" required /><br>
+        <button type="submit">ADD Expense</button>
+    </form>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+    <button id="rzp-button1">Buy Premium</button>
+    <button onclick="download()" id="downloadexpense">Download File</button>
+    <button onclick="downloadPastFiles()" id="download-past-files" style="display:none;">Download Past Files</button>
+     <!-- Added leaderboard container -->
+   
+    <div id = "leaderboard-button"></div>
+    <ul></ul>
+    <div id="leaderboard"></div>
+    <div id ="pagination">Pagination</div>
+   
+    <script>
+        let currentexpenseId = null;
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const expenseDetails = {
+                expenses: event.target.expenses.value,
+                category: event.target.category.value,
+                description: event.target.description.value,
+            };
+            const token = localStorage.getItem('token'); 
+
+            axios.post("http://localhost:3000/expenses/add-expenses", expenseDetails, { headers: { "Authorization": token } })
+                .then((response) => {
+                    const expenselist = document.querySelector("ul");
+                    expenselist.innerHTML = "";
+                    response.data.forEach(expense => displayExpenseOnScreen(expense));
+                    
+                })
+                .catch((error) => console.log(error));
+
+            // Clear the form fields
+            document.getElementById("expenses").value = "";
+            document.getElementById("category").value = "";
+            document.getElementById("description").value = "";
+        }
+
+        function parseJwt(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        }
+    function download() {
+    const token = localStorage.getItem('token'); 
+    axios.get('http://localhost:3000/users/download', { headers: { "Authorization": token } })
+        .then((response) => {
+            if (response.status === 200) {
+                console.log('Download URL:', response.data.fileURL); // Add this line for debugging
+                var a = document.createElement("a");
+                a.href = response.data.fileURL;
+                a.download = 'myexpense.csv';
+                document.body.appendChild(a); // Append to body to ensure click works in all environments
+                a.click();
+                document.body.removeChild(a); // Remove after click
+                document.getElementById('download-past-files').style.display = 'block';
+            } else {
+                throw new Error(response.data.message);
+            }
+        })
+        .catch((err) => {
+            console.error('Download function error:', err);
+        });
+}
+
+function downloadPastFiles() {
+    const token = localStorage.getItem('token'); 
+    axios.get('http://localhost:3000/users/past-download', { headers: { "Authorization": token } })
+        .then((response) => {
+            if (response.status === 200) {
+                const fileURL = response.data.fileURLsFile;
+                console.log('Download URL:', fileURL);  // Log the file URL
+
+                // Fetch the content of the file from the URL
+                axios.get(fileURL)
+                    .then((fileResponse) => {
+                        const fileContent = fileResponse.data;
+                       
+
+                        // Assuming the file content is a list of URLs separated by line breaks
+                        const fileURLs = fileContent.split('\n').map(url => url.trim());
+
+                       
+                            const csvContent = "data:text/csv;charset=utf-8,URL\n" + fileURLs.join("\n");
+
+                            const encodedUri = encodeURI(csvContent);
+                            const a = document.createElement("a");
+                            a.setAttribute("href", encodedUri);
+                            a.setAttribute("download", "past_urls.csv");
+                            document.body.appendChild(a);  // Append to body to ensure click works in all environments
+                            a.click();
+                            document.body.removeChild(a);  // Remove after click
+                       
+                    })
+                    .catch((err) => {
+                        console.error('Error downloading file content:', err);
+                    });
+            } else {
+                throw new Error(response.data.message);
+            }
+        })
+        .catch((err) => {
+            console.error('Download function error:', err);
+        });
+}
+
+
+function loadExpenses(page) {
+    const token = localStorage.getItem('token');
+    const itemsPerPage = localStorage.getItem('itemsPerPage') || 10; // Default to 10 if not set
+
+    axios.get(`http://localhost:3000/expenses/get-expenses?page=${page}&limit=${itemsPerPage}`, {
+        headers: { "Authorization": token }
+    })
+    .then((response) => {
+        const expenselist = document.querySelector("ul");
+        expenselist.innerHTML = ""; // Clear the list
+        response.data.expenses.forEach(expense => displayExpenseOnScreen(expense));
+
+        // Add pagination controls
+        document.getElementById('pagination').innerHTML = `
+            <button ${page <= 1 ? 'disabled' : ''} onclick="loadExpenses(${page - 1})">Previous</button>
+            <span>Page ${page} of ${response.data.totalPages}</span>
+            <button ${page >= response.data.totalPages ? 'disabled' : ''} onclick="loadExpenses(${page + 1})">Next</button>
+        `;
+    })
+    .catch((error) => console.log(error));
+}
+
+let currentPage = 1; // Ensure this is declared globally
+window.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem('token');
+    const storedItemsPerPage = localStorage.getItem('itemsPerPage');
+    
+    // Check if storedItemsPerPage exists, and set it as the value in the form
+    if (storedItemsPerPage) {
+        document.getElementById('items-per-page').value = storedItemsPerPage;
+    }
+
+    loadExpenses(currentPage); // Load expenses with the current preferences
+
+    if (token) {
+        const decodedToken = parseJwt(token);
+        const isAdmin = decodedToken.ispremiumuser;
+
+        if (isAdmin) {
+            const premiumMessage = document.createElement('p');
+            premiumMessage.textContent = "You are a premium user now. Enjoy!";
+            showLeaderBoard();
+
+            const buyButton = document.getElementById('rzp-button1');
+            if (buyButton) {
+                buyButton.replaceWith(premiumMessage);
+            }
+        } else {
+            console.log('User is not a premium user.');
+        }
+
+        axios.get("http://localhost:3000/expenses/get-expenses", {
+            headers: { "Authorization": token }
+        })
+        .then((response) => {
+            response.data.forEach(expense => displayExpenseOnScreen(expense));
+        })
+        .catch((error) => console.log(error));
+    }
+});
+
+// When the preferences form is submitted, store the number of items per page in localStorage
+document.getElementById('preferences-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const itemsPerPage = document.getElementById('items-per-page').value;
+    
+    if (itemsPerPage > 0) {
+        localStorage.setItem('itemsPerPage', itemsPerPage);
+        currentPage = 1; // Reset to first page when changing preferences
+        loadExpenses(currentPage); // Refresh the expenses list with new settings
+    }
+});
+
+
+        function displayExpenseOnScreen(expenseDetails) {
+            const expenseItem = document.createElement("li");
+            expenseItem.appendChild(
+                document.createTextNode(`${expenseDetails.expenses} - ${expenseDetails.category} - ${expenseDetails.description}`)
+            );
+
+            // Create delete button
+            const deleteBtn = document.createElement("button");
+            deleteBtn.appendChild(document.createTextNode("Delete"));
+            expenseItem.appendChild(deleteBtn);
+
+            
+
+            const expenseList = document.querySelector("ul");
+            expenseList.appendChild(expenseItem);
+
+            // Delete functionality
+            deleteBtn.addEventListener("click", function () {
+                const token = localStorage.getItem('token'); 
+                axios.delete(`http://localhost:3000/expenses/delete-expense/${expenseDetails.id}`, {
+                    headers: { "Authorization": token }
+                })
+                    .then(() => {
+                        expenseList.removeChild(expenseItem);
+                        console.log(`Expense with ID ${expenseDetails.id} deleted successfully`);
+                    })
+                    .catch((error) => console.log(error));
+            });
+        }
+
+        document.getElementById('rzp-button1').onclick = async function (e) {
+            e.preventDefault(); // Move this to the start to prevent any default action
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.get("http://localhost:3000/purchase/premiummembership", {
+                    headers: { "Authorization": token }
+                });
+                console.log(response);
+
+                var options = {
+                    "key": response.data.key_id,
+                    "order_id": response.data.order.id,
+                    "handler": async function (response) {
+                        try {
+                            const res = await axios.post('http://localhost:3000/purchase/updatetransactionstatus', {
+                                order_id: options.order_id,
+                                payment_id: response.razorpay_payment_id,
+                            }, {
+                                headers: { "Authorization": token }
+                            });
+                            console.log(res);
+
+                            alert('You are a premium user now');
+                            const premiumMessage = document.createElement('p');
+                            premiumMessage.textContent = "You are a premium user now. Enjoy!";
+                            document.getElementById('rzp-button1').replaceWith(premiumMessage);
+
+                            showLeaderBoard();
+
+                            // Save the updated token to localStorage
+                            localStorage.setItem('token', res.data.token);
+
+                        } catch (error) {
+                            console.error('Error updating transaction status:', error);
+                        }
+                    },
+                };
+
+                const rzp1 = new Razorpay(options);
+                rzp1.open();
+
+                rzp1.on('payment.failed', function (response) {
+                    console.log(response);
+                    alert('Something went wrong');
+                });
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Something went wrong');
+            }
+        };
+
+        function showLeaderBoard() {
+    const inputElement = document.createElement("input");
+    inputElement.type = "button";
+    inputElement.value = 'Show LeaderBoard';
+
+    inputElement.onclick = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const userLeaderBoardArray = await axios.get('http://localhost:3000/premium/showleaderboard', {
+                headers: { "Authorization": token }
+            });
+
+            console.log(userLeaderBoardArray);
+            var leaderboardElement = document.getElementById('leaderboard');
+            leaderboardElement.innerHTML = '<h1>LeaderBoard</h1>'; // Clear and add header
+
+            userLeaderBoardArray.data.forEach((userDetails) => {
+                leaderboardElement.innerHTML += `<p>Name: ${userDetails.name} - Total Expense: ${userDetails.totalExpenses}</p>`;
+            });
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+        }
+    };
+
+    // Append the button first so that it stays on top of the leaderboard
+    document.getElementById('leaderboard-button').appendChild(inputElement);
+
+    // Now, append the leaderboard after the button has been added
+    const leaderboardElement = document.getElementById('leaderboard');
+    leaderboardElement.innerHTML = ''; // Clear any previous content before adding the leaderboard
+}
+ 
+    </script>
+</body>
+</html>
