@@ -61,6 +61,7 @@ const downloadexpense = async (req, res) => {
   }
 };
 
+
 // Add a new expense
 const postAddExpense = async (req, res, next) => {
   const t = await sequelize.transaction();
@@ -140,9 +141,42 @@ const postDeleteExpense = async (req, res, next) => {
   }
 };
 
+const downloadPastFileUrls = async (req, res) => {
+  try {
+    // Retrieve all past file URLs for the user along with their creation dates
+    const pastFiles = await FileUrl.findAll({
+      where: { userId: req.user.id },
+      attributes: ['url', 'createdAt'],
+      order: [['createdAt', 'DESC']], // Optional: order by creation date
+    });
+
+    if (!pastFiles || pastFiles.length === 0) {
+      return res.status(404).json({ error: 'No past URLs found' });
+    }
+
+    // Format each file URL with its creation date
+    const pastFileURLs = pastFiles.map(file => {
+      const formattedDate = new Date(file.createdAt).toISOString(); // Format the date as ISO string
+      return `${formattedDate}, ${file.url}`; // Include both the date and URL
+    }).join('\n'); // Join all entries with a new line
+
+    const fileListName = `PastFileURLs_${req.user.id}_${new Date().toISOString()}.txt`;
+
+    // Upload the file containing all past URLs and their dates to S3
+    const fileURLsUpload = await S3Service.uploadToS3(pastFileURLs, fileListName);
+
+    // Return the URL of the uploaded file
+    res.status(200).json({ fileURLsFile: fileURLsUpload, success: true });
+  } catch (error) {
+    console.error('Error creating file with past URLs:', error);
+    res.status(500).json({ error: 'An error occurred while generating the file with past URLs' });
+  }
+};
+
 module.exports = {
   getAddExpense,
   downloadexpense,
   postAddExpense,
   postDeleteExpense,
+  downloadPastFileUrls
 };
