@@ -11,5 +11,6 @@ router.post('/login',usersController.postLoginDetails);
 
 
 router.get('/download',authenticator.authenticate, expenseController.downloadexpense);
+router.get('/past-download',authenticator.authenticate, expenseController.downloadPastFileUrls);
 
 module.exports = router;
