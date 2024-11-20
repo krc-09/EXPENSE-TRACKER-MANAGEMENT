@@ -31,6 +31,7 @@
         <button type="submit">ADD Expense</button>
     </form>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<<<<<<< HEAD
    <link rel="stylesheet" href="../main/expense.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
@@ -38,6 +39,14 @@
     <button onclick="download()" id="downloadexpense" style="display:none;">Download File</button>
     <button onclick="downloadPastFiles()" id="download-past-files" style="display:none;">Download Past Files</button>
     
+=======
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+    <button id="rzp-button1">Buy Premium</button>
+    <button onclick="download()" id="downloadexpense">Download File</button>
+    <button onclick="downloadPastFiles()" id="download-past-files" style="display:none;">Download Past Files</button>
+     <!-- Added leaderboard container -->
+>>>>>>> 4ec143124690b802c7905c1975b5df9a06201365
    
     <div id = "leaderboard-button"></div>
     <ul></ul>
@@ -185,18 +194,27 @@ window.addEventListener("DOMContentLoaded", () => {
 
         if (isAdmin) {
             const premiumMessage = document.createElement('p');
+<<<<<<< HEAD
             premiumMessage.textContent = "You are a premium user now. Enjoy premium features!";
+=======
+            premiumMessage.textContent = "You are a premium user now. Enjoy!";
+>>>>>>> 4ec143124690b802c7905c1975b5df9a06201365
             showLeaderBoard();
 
             const buyButton = document.getElementById('rzp-button1');
             if (buyButton) {
                 buyButton.replaceWith(premiumMessage);
             }
+<<<<<<< HEAD
             document.getElementById('downloadexpense').style.display ="inline";
         } else {
             console.log('User is not a premium user.');
             document.getElementById('downloadexpense').style.display ="none";
 
+=======
+        } else {
+            console.log('User is not a premium user.');
+>>>>>>> 4ec143124690b802c7905c1975b5df9a06201365
         }
 
         axios.get("http://localhost:3000/expenses/get-expenses", {
@@ -281,7 +299,11 @@ document.getElementById('preferences-form').addEventListener('submit', (event) =
                             document.getElementById('rzp-button1').replaceWith(premiumMessage);
 
                             showLeaderBoard();
+<<<<<<< HEAD
                             document.getElementById('downloadexpense').style.display ="inline";
+=======
+
+>>>>>>> 4ec143124690b802c7905c1975b5df9a06201365
                             // Save the updated token to localStorage
                             localStorage.setItem('token', res.data.token);
 
