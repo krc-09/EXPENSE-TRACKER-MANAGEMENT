@@ -12,6 +12,8 @@
     </style>
 </head>
 <body>
+    <h1>WELCOME TO EXPENSE TRACKER</h1>
+    <h2>SIGNUP NOW</h2>
     <form onsubmit="handleFormSubmit(event)">
         <label for="name">Username</label>
         <input type="text" id="name" name="name" required>
@@ -24,10 +26,11 @@
 
         <button type="submit">Submit</button>
     </form>
-
+     
     <p id="message"></p> <!-- Element to show user feedback -->
-
+    <p><a href="./login.html"> ALREADY HAVE AN ACCOUNT?LOGIN NOW</a></p>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+    <link rel="stylesheet" href="../main/signup.css">
     <script>
         let currentuserId = null;
 

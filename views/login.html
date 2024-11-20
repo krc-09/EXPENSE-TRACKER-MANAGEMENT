@@ -10,8 +10,13 @@
             font-weight: bold;
         }
     </style>
+    <link rel="stylesheet" href="../main/login.css">
 </head>
 <body>
+    <h3>WELCOME TO EXPENSE-TRACKER</h3>
+    <h2>ALREADY A USER?LOGIN NOW</h2>
+    <h1>LOGIN </h1>
+    
     <form onsubmit="handleFormSubmit(event)">
         
 
@@ -37,16 +42,7 @@
     <p id="message"></p>
     <p><a href="./signup.html"> NEW USER -SIGNUP NOW</a></p>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
-<style>
-    #formContainer{
-        display:none;
-        border:1px solid paleturquoise;
-        padding: 20px;
-        margin-top: 20px;
-        width: 300px;
 
-    }
-</style>
     <script>
  function openForm() {
             document.getElementById('formContainer').style.display = 'block';
