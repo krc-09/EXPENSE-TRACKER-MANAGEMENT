@@ -7,12 +7,9 @@ const express = require('express');
 const app = express();
 const helmet = require('helmet');
 const morgan = require('morgan');
-<<<<<<< HEAD
 const dotenv = require('dotenv');
 dotenv.config();
 
-=======
->>>>>>> 4ec143124690b802c7905c1975b5df9a06201365
 const Users = require('./Models/users'); 
 const Expense = require('./Models/Expenses'); 
 const Order = require('./Models/orders'); 

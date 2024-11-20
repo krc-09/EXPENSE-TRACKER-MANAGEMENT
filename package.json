@@ -22,13 +22,9 @@
     "express": "^4.21.1",
     "g": "^2.0.1",
     "git-filter-repo": "^0.0.30",
-<<<<<<< HEAD
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-=======
-    "jsonwebtoken": "^9.0.2",
->>>>>>> 4ec143124690b802c7905c1975b5df9a06201365
     "mysql2": "^3.11.4",
     "parser": "^0.1.4",
     "razorpay": "^2.9.5",
