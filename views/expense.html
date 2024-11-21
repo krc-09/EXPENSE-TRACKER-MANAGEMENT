@@ -4,9 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
+    <link rel="stylesheet" href="../main/expense.css"> <!-- Your CSS file -->
 </head>
 <body style="margin:0">
-    <h1>Expense Tracker</h1>
+    <div id="top">
+        <nav style="background-color: #333; padding: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <!-- Title -->
+                <h1 style="color: white; margin: 0;">Expense Tracker</h1>
+                
+                <!-- Navigation links -->
+                <div style="margin-left: auto;">
+                    <a href="./login.html" style="color: white; margin-left: 20px;">LOGIN</a>
+                    <a href="./signup.html" style="color: white; margin-left: 20px;">SIGNUP</a>
+                </div>
+            </div>
+        </nav>
+    </div>
     <form id="preferences-form">
         <label for="items-per-page">Number of expenses per page:</label>
         <input type="number" id="items-per-page" min="1" placeholder="Enter number" required>
@@ -321,8 +335,8 @@ document.getElementById('preferences-form').addEventListener('submit', (event) =
             var leaderboardElement = document.getElementById('leaderboard');
             leaderboardElement.innerHTML = '<h1>LeaderBoard</h1>'; // Clear and add header
 
-            userLeaderBoardArray.data.forEach((userDetails) => {
-                leaderboardElement.innerHTML += `<p>Name: ${userDetails.name} - Total Expense: ${userDetails.totalExpenses}</p>`;
+            userLeaderBoardArray.data.forEach((userDetails, index) => {
+                leaderboardElement.innerHTML += `<p>${index + 1}.Name: ${userDetails.name} - Total Expense: ${userDetails.totalExpenses}</p>`;
             });
         } catch (error) {
             console.error('Error fetching leaderboard:', error);
