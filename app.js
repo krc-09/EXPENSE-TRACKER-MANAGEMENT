@@ -1,3 +1,4 @@
+
 const sequelize = require('./utils/database');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -72,7 +73,7 @@ app.use((err, req, res, next) => {
 sequelize.sync()
   .then(result => {
     console.log('Database synced');
-    app.listen(3000, () => {
+    app.listen(3000||process.env.PORT, () => {
       console.log('Server is running on port 3000');
     });
   })
